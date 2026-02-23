@@ -25,6 +25,13 @@ mod Stampd {
         StoragePointerWriteAccess,
     };
 
+    #[derive(Drop, Serde, PartialEq, starknet::Store)]
+    pub enum ReceiptStatus {
+        Committed,
+        Disputed,
+        Revealed,
+    }
+
     #[derive(Drop, Serde, starknet::Store)]
     pub struct Receipt {
         pub commitment: felt252,
@@ -32,6 +39,7 @@ mod Stampd {
         pub client: ContractAddress,
         pub project_tag: felt252,
         pub timestamp: u64,
+        pub status: ReceiptStatus,
     }
 
     #[storage]
@@ -79,6 +87,7 @@ mod Stampd {
                 client,
                 project_tag,
                 timestamp,
+                 status: ReceiptStatus::Committed,
             };
 
             self.receipts.entry(receipt_id).write(receipt);

@@ -14,6 +14,13 @@ trait IStampd<TContractState> {
         receipt_id: u64
     );
 
+    fn reveal(
+        ref self: TContractState,
+        receipt_id: u64,
+        delivery_hash: felt252,
+        salt: felt252
+    );
+
     fn get_receipt(
         self: @TContractState,
         receipt_id: u64
@@ -62,6 +69,7 @@ pub enum ReceiptStatus {
     enum Event {
         StampdCommitted: StampdCommitted,
         StampdDisputed: StampdDisputed,
+        StampdRevealed: StampdRevealed,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -80,6 +88,14 @@ pub enum ReceiptStatus {
         by: ContractAddress,
         timestamp: u64,
     }
+
+    #[derive(Drop, starknet::Event)]
+    struct StampdRevealed {
+        receipt_id: u64,
+        by: ContractAddress,
+        delivery_hash: felt252,
+        timestamp: u64,
+   }
 
     #[constructor]
     fn constructor(ref self: ContractState) {
@@ -143,6 +159,35 @@ pub enum ReceiptStatus {
             timestamp: get_block_timestamp(),
         });
     }
+
+    fn reveal(
+    ref self: ContractState,
+    receipt_id: u64,
+    delivery_hash: felt252,
+    salt: felt252
+) {
+    let caller = get_caller_address();
+    let mut receipt = self.receipts.entry(receipt_id).read();
+
+    assert(caller == receipt.freelancer, 'Only freelancer can reveal');
+    assert(receipt.status == ReceiptStatus::Disputed, 'Invalid state');
+
+    // Recompute commitment
+    let recomputed = delivery_hash + salt;
+
+    assert(recomputed == receipt.commitment, 'Commitment mismatch');
+
+    receipt.status = ReceiptStatus::Revealed;
+
+    self.receipts.entry(receipt_id).write(receipt);
+
+    self.emit(StampdRevealed {
+        receipt_id,
+        by: caller,
+        delivery_hash,
+        timestamp: get_block_timestamp(),
+    });
+}
 
     fn get_receipt(self: @ContractState, receipt_id: u64) -> Receipt {
         self.receipts.entry(receipt_id).read()

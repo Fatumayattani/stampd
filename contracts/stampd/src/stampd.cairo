@@ -31,6 +31,8 @@ trait IStampd<TContractState> {
 mod Stampd {
     use starknet::ContractAddress;
     use starknet::{get_block_timestamp, get_caller_address};
+    use core::hash::HashStateTrait;
+    use core::pedersen::PedersenTrait;
 
     use starknet::event::EventEmitter;
     use starknet::storage::{
@@ -173,7 +175,7 @@ pub enum ReceiptStatus {
     assert(receipt.status == ReceiptStatus::Disputed, 'Invalid state');
 
     // Recompute commitment
-    let recomputed = delivery_hash + salt;
+    let recomputed = PedersenTrait::new(delivery_hash).update(salt).finalize();
 
     assert(recomputed == receipt.commitment, 'Commitment mismatch');
 

@@ -1,4 +1,7 @@
 import { FormEvent, useState } from "react";
+import { Contract } from "starknet";
+import { STAMPD_CONTRACT } from "./config";
+import { STAMPD_ABI } from "./abi/stampd";
 
 declare global {
   interface Window {
@@ -39,6 +42,7 @@ function App() {
   });
 
   const [disputeReceiptId, setDisputeReceiptId] = useState("");
+
   const [revealForm, setRevealForm] = useState({
     receiptId: "",
     deliveryHash: "",
@@ -46,6 +50,7 @@ function App() {
   });
 
   const [viewerReceiptId, setViewerReceiptId] = useState("");
+
   const [activeReceipt, setActiveReceipt] =
     useState<ReceiptData>(emptyReceipt);
 
@@ -76,112 +81,141 @@ function App() {
     return addr.slice(0, 6) + "..." + addr.slice(-4);
   };
 
+  const getContract = () => {
+  if (!window.starknet?.account) {
+    throw new Error("Wallet not connected");
+  }
+
+  return new Contract(
+    STAMPD_ABI,
+    STAMPD_CONTRACT,
+    window.starknet.account as any
+  );
+};
+
   /* ------------------------
-     Protocol Actions (Demo)
+     STAMP
   -------------------------*/
 
-  const handleCommit = (e: FormEvent) => {
+  const handleCommit = async (e: FormEvent) => {
     e.preventDefault();
 
-    setActiveReceipt({
-      receiptId: "1",
-      deliveryHash: "",
-      salt: "",
-      ...commitmentForm,
-      status: "Committed"
-    });
+    try {
+      const contract = getContract();
+
+      const tx = await contract.stamp(
+  commitmentForm.commitment.toString(),
+  commitmentForm.clientAddress,
+  commitmentForm.projectTag.toString()
+);
+
+      console.log("STAMP TX:", tx);
+
+      setActiveReceipt({
+        receiptId: "pending",
+        deliveryHash: "",
+        salt: "",
+        ...commitmentForm,
+        status: "Committed"
+      });
+
+    } catch (err) {
+      console.error(err);
+      alert("Transaction failed");
+    }
   };
 
-  const handleDispute = (e: FormEvent) => {
+  /* ------------------------
+     DISPUTE
+  -------------------------*/
+
+  const handleDispute = async (e: FormEvent) => {
     e.preventDefault();
 
-    setActiveReceipt((current) => ({
-      ...current,
-      status: "Disputed"
-    }));
+    try {
+      const contract = getContract();
 
-    setDisputeReceiptId("");
+      const tx = await contract.dispute(disputeReceiptId.toString());
+
+      console.log("DISPUTE TX:", tx);
+
+      setActiveReceipt((current) => ({
+        ...current,
+        status: "Disputed"
+      }));
+
+      setDisputeReceiptId("");
+
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleReveal = (e: FormEvent) => {
+  /* ------------------------
+     REVEAL
+  -------------------------*/
+
+  const handleReveal = async (e: FormEvent) => {
     e.preventDefault();
 
-    setActiveReceipt((current) => ({
-      ...current,
-      ...revealForm,
-      status: "Revealed"
-    }));
+    try {
+      const contract = getContract();
+
+      const tx = await contract.reveal(
+  revealForm.receiptId.toString(),
+  revealForm.deliveryHash.toString(),
+  revealForm.salt.toString()
+);
+
+      console.log("REVEAL TX:", tx);
+
+      setActiveReceipt((current) => ({
+        ...current,
+        ...revealForm,
+        status: "Revealed"
+      }));
+
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  const handleViewerLoad = (e: FormEvent) => {
+  /* ------------------------
+     VIEW RECEIPT
+  -------------------------*/
+
+  const handleViewerLoad = async (e: FormEvent) => {
     e.preventDefault();
 
-    setActiveReceipt((current) => ({
-      ...current,
-      receiptId: viewerReceiptId
-    }));
+    try {
+      const contract = getContract();
+
+      const receipt = await contract.get_receipt(viewerReceiptId);
+
+      setActiveReceipt({
+        receiptId: viewerReceiptId,
+        commitment: receipt.commitment,
+        clientAddress: receipt.client,
+        projectTag: receipt.project_tag,
+        deliveryHash: "",
+        salt: "",
+        status: receipt.status
+      });
+
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
     <div className="page">
-      {/* HERO */}
+
       <header className="hero">
+
         <div>
           <p className="eyebrow">STARKNET PRIVACY PROTOCOL</p>
 
           <div className="wordmark">
-            <svg
-              className="seal"
-              viewBox="0 0 100 100"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient id="sealGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ff7a00" />
-                  <stop offset="100%" stopColor="#ffd60a" />
-                </linearGradient>
-              </defs>
-
-              <circle
-                cx="50"
-                cy="50"
-                r="42"
-                stroke="url(#sealGradient)"
-                strokeWidth="3"
-                fill="none"
-              />
-
-              <circle
-                cx="50"
-                cy="50"
-                r="28"
-                stroke="url(#sealGradient)"
-                strokeWidth="2"
-                fill="none"
-                opacity="0.6"
-              />
-
-              {[...Array(12)].map((_, i) => {
-                const angle = (i * 30 * Math.PI) / 180;
-                const x1 = 50 + 38 * Math.cos(angle);
-                const y1 = 50 + 38 * Math.sin(angle);
-                const x2 = 50 + 42 * Math.cos(angle);
-                const y2 = 50 + 42 * Math.sin(angle);
-
-                return (
-                  <line
-                    key={i}
-                    x1={x1}
-                    y1={y1}
-                    x2={x2}
-                    y2={y2}
-                    stroke="url(#sealGradient)"
-                    strokeWidth="2"
-                  />
-                );
-              })}
-            </svg>
-
             <h1>Stampd</h1>
           </div>
 
@@ -195,9 +229,9 @@ function App() {
             ? shortenAddress(walletAddress)
             : "Connect Wallet"}
         </button>
+
       </header>
 
-      {/* LIFECYCLE VISUAL */}
       <section className="lifecycle">
         <span className={activeReceipt.status === "Committed" ? "active" : ""}>
           Committed
@@ -211,10 +245,12 @@ function App() {
       </section>
 
       <main className="grid">
-        {/* STAMP */}
+
         <section className="card">
           <h2>Stamp Commitment</h2>
+
           <form onSubmit={handleCommit} className="stack">
+
             <input
               placeholder="Commitment"
               value={commitmentForm.commitment}
@@ -226,6 +262,7 @@ function App() {
               }
               required
             />
+
             <input
               placeholder="Client Address"
               value={commitmentForm.clientAddress}
@@ -237,6 +274,7 @@ function App() {
               }
               required
             />
+
             <input
               placeholder="Project Tag"
               value={commitmentForm.projectTag}
@@ -248,16 +286,19 @@ function App() {
               }
               required
             />
+
             <button type="submit" className="secondary-btn">
               Commit Stamp
             </button>
+
           </form>
         </section>
 
-        {/* DISPUTE */}
         <section className="card">
           <h2>Dispute Receipt</h2>
+
           <form onSubmit={handleDispute} className="stack">
+
             <input
               placeholder="Receipt ID"
               value={disputeReceiptId}
@@ -266,16 +307,19 @@ function App() {
               }
               required
             />
+
             <button type="submit" className="secondary-btn">
               Open Dispute
             </button>
+
           </form>
         </section>
 
-        {/* REVEAL */}
         <section className="card">
           <h2>Reveal Delivery</h2>
+
           <form onSubmit={handleReveal} className="stack">
+
             <input
               placeholder="Receipt ID"
               value={revealForm.receiptId}
@@ -287,6 +331,7 @@ function App() {
               }
               required
             />
+
             <input
               placeholder="Delivery Hash"
               value={revealForm.deliveryHash}
@@ -298,6 +343,7 @@ function App() {
               }
               required
             />
+
             <input
               placeholder="Salt"
               value={revealForm.salt}
@@ -309,17 +355,20 @@ function App() {
               }
               required
             />
+
             <button type="submit" className="secondary-btn">
               Reveal Proof
             </button>
+
           </form>
         </section>
 
-        {/* VIEWER */}
         <section className="card viewer-card">
+
           <h2>Receipt Viewer</h2>
 
           <form onSubmit={handleViewerLoad} className="stack">
+
             <input
               placeholder="Receipt ID"
               value={viewerReceiptId}
@@ -328,13 +377,17 @@ function App() {
               }
               required
             />
+
             <button type="submit" className="secondary-btn">
               Load Receipt
             </button>
+
           </form>
 
           <div className="receipt-display">
+
             <h3>Receipt State</h3>
+
             <ul>
               <li><strong>ID:</strong> {activeReceipt.receiptId || "—"}</li>
               <li><strong>Status:</strong> {activeReceipt.status}</li>
@@ -344,9 +397,13 @@ function App() {
               <li><strong>Delivery Hash:</strong> {activeReceipt.deliveryHash || "—"}</li>
               <li><strong>Salt:</strong> {activeReceipt.salt || "—"}</li>
             </ul>
+
           </div>
+
         </section>
+
       </main>
+
     </div>
   );
 }

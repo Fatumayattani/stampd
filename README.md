@@ -132,5 +132,10 @@ docs/           Architecture and specification
 
 ## Status
 
-Active development.
-Target: Starknet testnet deployment.
+✔ Contract deployed on Starknet Sepolia
+
+Contract  
+`0x07f50bc88d9568c53a512e96995905e1518acf7167d61471db431845c360db93`
+
+Explorer  
+https://sepolia.voyager.online/contract/0x07f50bc88d9568c53a512e96995905e1518acf7167d61471db431845c360db93

@@ -1,5 +1,11 @@
 import { FormEvent, useState } from "react";
 
+declare global {
+  interface Window {
+    starknet?: any;
+  }
+}
+
 type ReceiptStatus = "Committed" | "Disputed" | "Revealed";
 
 type ReceiptData = {
@@ -24,6 +30,8 @@ const emptyReceipt: ReceiptData = {
 
 function App() {
   const [walletConnected, setWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState("");
+
   const [commitmentForm, setCommitmentForm] = useState({
     commitment: "",
     clientAddress: "",
@@ -40,6 +48,33 @@ function App() {
   const [viewerReceiptId, setViewerReceiptId] = useState("");
   const [activeReceipt, setActiveReceipt] =
     useState<ReceiptData>(emptyReceipt);
+
+  /* ------------------------
+     WALLET CONNECT
+  -------------------------*/
+
+  const connectWallet = async () => {
+    if (!window.starknet) {
+      alert("Ready Wallet not detected");
+      return;
+    }
+
+    try {
+      const accounts = await window.starknet.enable();
+
+      if (accounts && accounts.length > 0) {
+        setWalletAddress(accounts[0]);
+        setWalletConnected(true);
+      }
+    } catch (error) {
+      console.error("Wallet connection failed:", error);
+    }
+  };
+
+  const shortenAddress = (addr: string) => {
+    if (!addr) return "";
+    return addr.slice(0, 6) + "..." + addr.slice(-4);
+  };
 
   /* ------------------------
      Protocol Actions (Demo)
@@ -89,100 +124,88 @@ function App() {
 
   return (
     <div className="page">
-    {/* HERO */}
-<header className="hero">
-  <div>
-    <p className="eyebrow">STARKNET PRIVACY PROTOCOL</p>
+      {/* HERO */}
+      <header className="hero">
+        <div>
+          <p className="eyebrow">STARKNET PRIVACY PROTOCOL</p>
 
-    <div className="wordmark">
-      <svg
-        className="seal"
-        viewBox="0 0 100 100"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <defs>
-          <linearGradient id="sealGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#ff7a00" />
-            <stop offset="100%" stopColor="#ffd60a" />
-          </linearGradient>
-        </defs>
+          <div className="wordmark">
+            <svg
+              className="seal"
+              viewBox="0 0 100 100"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="sealGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#ff7a00" />
+                  <stop offset="100%" stopColor="#ffd60a" />
+                </linearGradient>
+              </defs>
 
-        <circle
-          cx="50"
-          cy="50"
-          r="42"
-          stroke="url(#sealGradient)"
-          strokeWidth="3"
-          fill="none"
-        />
+              <circle
+                cx="50"
+                cy="50"
+                r="42"
+                stroke="url(#sealGradient)"
+                strokeWidth="3"
+                fill="none"
+              />
 
-        <circle
-          cx="50"
-          cy="50"
-          r="28"
-          stroke="url(#sealGradient)"
-          strokeWidth="2"
-          fill="none"
-          opacity="0.6"
-        />
+              <circle
+                cx="50"
+                cy="50"
+                r="28"
+                stroke="url(#sealGradient)"
+                strokeWidth="2"
+                fill="none"
+                opacity="0.6"
+              />
 
-        {[...Array(12)].map((_, i) => {
-          const angle = (i * 30 * Math.PI) / 180;
-          const x1 = 50 + 38 * Math.cos(angle);
-          const y1 = 50 + 38 * Math.sin(angle);
-          const x2 = 50 + 42 * Math.cos(angle);
-          const y2 = 50 + 42 * Math.sin(angle);
+              {[...Array(12)].map((_, i) => {
+                const angle = (i * 30 * Math.PI) / 180;
+                const x1 = 50 + 38 * Math.cos(angle);
+                const y1 = 50 + 38 * Math.sin(angle);
+                const x2 = 50 + 42 * Math.cos(angle);
+                const y2 = 50 + 42 * Math.sin(angle);
 
-          return (
-            <line
-              key={i}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke="url(#sealGradient)"
-              strokeWidth="2"
-            />
-          );
-        })}
-      </svg>
+                return (
+                  <line
+                    key={i}
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke="url(#sealGradient)"
+                    strokeWidth="2"
+                  />
+                );
+              })}
+            </svg>
 
-      <h1>Stampd</h1>
-    </div>
+            <h1>Stampd</h1>
+          </div>
 
-    <p className="tagline">
-      Privacy-first proof of delivery on Starknet.
-    </p>
-  </div>
+          <p className="tagline">
+            Privacy-first proof of delivery on Starknet.
+          </p>
+        </div>
 
-  <button
-    className="primary-btn"
-    onClick={() => setWalletConnected(!walletConnected)}
-  >
-    {walletConnected ? "Wallet Connected" : "Connect Wallet"}
-  </button>
-</header>
+        <button className="primary-btn" onClick={connectWallet}>
+          {walletConnected
+            ? shortenAddress(walletAddress)
+            : "Connect Wallet"}
+        </button>
+      </header>
+
       {/* LIFECYCLE VISUAL */}
       <section className="lifecycle">
-        <span
-          className={
-            activeReceipt.status === "Committed" ? "active" : ""
-          }
-        >
+        <span className={activeReceipt.status === "Committed" ? "active" : ""}>
           Committed
         </span>
-        <span
-          className={
-            activeReceipt.status === "Disputed" ? "active" : ""
-          }
-        >
+        <span className={activeReceipt.status === "Disputed" ? "active" : ""}>
           Disputed
         </span>
-        <span
-          className={
-            activeReceipt.status === "Revealed" ? "active" : ""
-          }
-        >
+        <span className={activeReceipt.status === "Revealed" ? "active" : ""}>
           Revealed
         </span>
       </section>

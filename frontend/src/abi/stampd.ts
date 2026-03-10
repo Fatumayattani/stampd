@@ -1,61 +1,50 @@
 export const STAMPD_ABI = [
   {
-    "type": "struct",
-    "name": "Receipt",
-    "members": [
-      { "name": "commitment", "type": "felt252" },
-      { "name": "freelancer", "type": "ContractAddress" },
-      { "name": "client", "type": "ContractAddress" },
-      { "name": "project_tag", "type": "felt252" },
-      { "name": "timestamp", "type": "u64" },
-      { "name": "status", "type": "felt252" }
-    ]
-  },
-
-  {
     "type": "function",
     "name": "stamp",
     "inputs": [
-      { "name": "commitment", "type": "felt252" },
-      { "name": "client", "type": "ContractAddress" },
-      { "name": "project_tag", "type": "felt252" }
+      { "name": "commitment", "type": "felt" },
+      { "name": "client", "type": "felt" },
+      { "name": "project_tag", "type": "felt" }
     ],
     "outputs": [
-      { "name": "receipt_id", "type": "u64" }
-    ],
-    "state_mutability": "external"
+      { "name": "receipt_id", "type": "felt" }
+    ]
   },
 
   {
     "type": "function",
     "name": "dispute",
     "inputs": [
-      { "name": "receipt_id", "type": "u64" }
+      { "name": "receipt_id", "type": "felt" }
     ],
-    "outputs": [],
-    "state_mutability": "external"
+    "outputs": []
   },
 
   {
     "type": "function",
     "name": "reveal",
     "inputs": [
-      { "name": "receipt_id", "type": "u64" },
-      { "name": "delivery_hash", "type": "felt252" },
-      { "name": "salt", "type": "felt252" }
+      { "name": "receipt_id", "type": "felt" },
+      { "name": "delivery_hash", "type": "felt" },
+      { "name": "salt", "type": "felt" }
     ],
-    "outputs": [],
-    "state_mutability": "external"
+    "outputs": []
   },
 
   {
     "type": "function",
     "name": "get_receipt",
     "inputs": [
-      { "name": "receipt_id", "type": "u64" }
+      { "name": "receipt_id", "type": "felt" }
     ],
     "outputs": [
-      { "type": "Receipt" }
+      { "name": "commitment", "type": "felt" },
+      { "name": "freelancer", "type": "felt" },
+      { "name": "client", "type": "felt" },
+      { "name": "project_tag", "type": "felt" },
+      { "name": "timestamp", "type": "felt" },
+      { "name": "status", "type": "felt" }
     ],
     "state_mutability": "view"
   }

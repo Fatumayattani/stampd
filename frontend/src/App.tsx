@@ -2,6 +2,7 @@ import { FormEvent, useState } from "react";
 import { Contract } from "starknet";
 import { STAMPD_CONTRACT } from "./config";
 import { STAMPD_ABI } from "./abi/stampd";
+import logo from "./assets/stampd-logo.svg";
 
 declare global {
   interface Window {
@@ -216,6 +217,7 @@ function App() {
           <p className="eyebrow">STARKNET PRIVACY PROTOCOL</p>
 
           <div className="wordmark">
+          <img src={logo} className="logo" alt="Stampd logo" />
             <h1>Stampd</h1>
           </div>
 

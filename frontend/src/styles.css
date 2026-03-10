@@ -40,6 +40,17 @@ body {
   opacity: 0.8;
 }
 
+.logo {
+  width: 38px;
+  height: 38px;
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 h1 {
   font-size: 2.6rem;
   font-weight: 700;

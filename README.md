@@ -130,12 +130,18 @@ docs/           Architecture and specification
 
 ---
 
-## Status
+Status
 
-✔ Contract deployed on Starknet Sepolia
+✔ Smart contract deployed on Starknet Sepolia  
+✔ Frontend integrated with Ready Wallet  
+✔ stamp() transaction successfully executed from the UI  
+✔ End-to-end flow verified (UI → Wallet → Starknet → Contract)
 
-Contract  
-`0x07f50bc88d9568c53a512e96995905e1518acf7167d61471db431845c360db93`
+Contract Address
+0x07f50bc88d9568c53a512e96995905e1518acf7167d61471db431845c360db93
 
-Explorer  
+Contract Explorer
 https://sepolia.voyager.online/contract/0x07f50bc88d9568c53a512e96995905e1518acf7167d61471db431845c360db93
+
+Example Transaction
+https://sepolia.voyager.online/tx/0x4e778b42c5ef21166d16314f8a06d526ff0182ecf6b8caf4586608ed8c20e83

@@ -130,7 +130,7 @@ docs/           Architecture and specification
 
 ---
 
-Status
+## Status
 
 ✔ Smart contract deployed on Starknet Sepolia  
 ✔ Frontend integrated with Ready Wallet  
@@ -145,3 +145,20 @@ https://sepolia.voyager.online/contract/0x07f50bc88d9568c53a512e96995905e1518acf
 
 Example Transaction
 https://sepolia.voyager.online/tx/0x4e778b42c5ef21166d16314f8a06d526ff0182ecf6b8caf4586608ed8c20e83
+
+## Roadmap
+
+Stampd begins with a focused use case: privacy preserving proof of delivery for freelance work. The long term vision is to evolve Stampd into a universal commitment registry for digital artifacts.
+
+Future directions include expanding Stampd beyond freelancer deliveries to support broader coordination and provenance use cases.
+
+Potential areas include:
+
+- AI dataset and model checkpoint timestamping
+- Research artifact commitments before publication
+- DAO contributor milestone verification
+- Grant and bounty completion proofs
+- Software build and release commitments
+- Intellectual property and creative work timestamping
+
+By acting as a neutral cryptographic commitment layer, Stampd can serve as infrastructure for applications that require verifiable proof that a digital artifact existed at a specific moment without revealing the underlying content.

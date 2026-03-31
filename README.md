@@ -127,8 +127,48 @@ contracts/      Cairo contract (Stampd)
 frontend/       React + TypeScript client
 docs/           Architecture and specification
 ```
+---
+
+## How to Run
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/Fatumayattani/stampd.git
+cd stampd
+```
 
 ---
+
+### 2. Start the frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+### 3. Connect wallet
+
+* Open the app in your browser
+* Connect **Ready Wallet** (or any Starknet-compatible wallet)
+* Switch to **Starknet Sepolia**
+
+---
+
+### 4. Interact with the contract
+
+* Enter delivery details
+  - stamp committment
+  - client address
+  - project tag
+* Submit a `stamp()` transaction
+* View the receipt onchain
+
+---
+
 
 ## Status
 
